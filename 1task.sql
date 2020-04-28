@@ -156,19 +156,23 @@ select
        avg(t2.first_operation - t1.registration_date) as first_operation_time,
        avg(t2.first_order - t1.registration_date) as first_order_time
 from
-     (
-         select
-                uid,
-                registration_date,country
-         from DB_DEFAULT.tb_users
-         ) t1
-left join(
+(
+  select
+    uid,
+    registration_date,
+    country
+    from DB_DEFAULT.tb_users
+    where
+    DATEDIFF(day,registration_date, current_date()) <= 90
+    ) t1
+left join
+(
   select
     tbl_log.user_uid,
     tbl_log.login,
     tbl_log.registration_date,
-        tbl_op.first_operation,
-        tbl_ord.first_order
+    tbl_op.first_operation,
+    tbl_ord.first_order
   from (
       select
            user_uid,
@@ -176,7 +180,7 @@ left join(
            registration_date
       from DB_DEFAULT.tb_logins
       where
-            DATEDIFF(day,registration_date, current_date()) < 90
+            DATEDIFF(day,registration_date, current_date()) <= 90
         and (user_uid,registration_date) in
             (
                 select user_uid,
